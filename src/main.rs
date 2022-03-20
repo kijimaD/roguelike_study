@@ -3,8 +3,6 @@ use specs::prelude::*;
 use std::cmp::{max, min};
 use specs_derive::Component;
 
-
-
 #[derive(Component)]
 struct Position {
     x: i32,
@@ -35,6 +33,7 @@ pub fn xy_idx(x: i32, y: i32) -> usize {
     (y as usize * 80) + x as usize
 }
 
+/// マップを作り、端の境界とランダムな壁を生成する
 fn new_map() -> Vec<TileType> {
     let mut map = vec![TileType::Floor; 80*50];
 
@@ -62,6 +61,7 @@ fn new_map() -> Vec<TileType> {
     map
 }
 
+/// プレイヤーを座標に動かす。動けない場合は何もしない
 fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
     let mut positions = ecs.write_storage::<Position>();
     let mut players = ecs.write_storage::<Player>();
@@ -71,11 +71,12 @@ fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
         let destination_idx = xy_idx(pos.x + delta_x, pos.y + delta_y);
         if map[destination_idx] != TileType::Wall {
             pos.x = min(79, max(0, pos.x + delta_x));
-            pos.y = min(49, max(0, pos.y + delta_y))
+            pos.y = min(49, max(0, pos.y + delta_y));
         }
     }
 }
 
+/// 入力によってプレイヤーを移動させる。有効なキー以外は無視する
 fn player_input(gs: &mut State, ctx: &mut Rltk) {
     match ctx.key {
         None => {}
@@ -89,6 +90,7 @@ fn player_input(gs: &mut State, ctx: &mut Rltk) {
     }
 }
 
+/// マップのタイルによって、対応した文字を描画する
 fn draw_map(map: &[TileType], ctx : &mut Rltk) {
     let mut y = 0;
     let mut x = 0;
