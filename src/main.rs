@@ -51,7 +51,7 @@ fn main() -> rltk::BError {
     gs.ecs.register::<Renderable>();
     gs.ecs.register::<Player>();
 
-    gs.ecs.insert(new_map_test());
+    gs.ecs.insert(new_map_rooms_and_corridors());
 
     gs.ecs
         .create_entity()
