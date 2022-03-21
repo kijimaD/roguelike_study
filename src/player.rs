@@ -49,6 +49,23 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
             VirtualKeyCode::S |
             VirtualKeyCode::J => try_move_player(0, 1, &mut gs.ecs),
 
+            // 斜め
+            VirtualKeyCode::Numpad9 |
+            VirtualKeyCode::E |
+            VirtualKeyCode::Y => try_move_player(1, -1, &mut gs.ecs),
+
+            VirtualKeyCode::Numpad7 |
+            VirtualKeyCode::Q |
+            VirtualKeyCode::U => try_move_player(-1, -1, &mut gs.ecs),
+
+            VirtualKeyCode::Numpad3 |
+            VirtualKeyCode::X |
+            VirtualKeyCode::N => try_move_player(1, 1, &mut gs.ecs),
+
+            VirtualKeyCode::Numpad1 |
+            VirtualKeyCode::Z |
+            VirtualKeyCode::B => try_move_player(-1, 1, &mut gs.ecs),
+
             _ => { return RunState::Paused }
         },
     }
