@@ -87,7 +87,8 @@ fn main() -> rltk::BError {
             _ => { glyph = rltk::to_cp437('o'); name = "Orc".to_string(); }
         }
 
-        gs.ecs.create_entity()
+        gs.ecs
+            .create_entity()
             .with(Position{ x, y})
             .with(Renderable{
                 glyph: glyph,
@@ -112,6 +113,7 @@ fn main() -> rltk::BError {
         })
         .with(Player{})
         .with(Viewshed{ visible_tiles : Vec::new(), range: 8, dirty: true })
+        .with(Name{name: "Player".to_string()})
         .build();
 
     gs.ecs.insert(Point::new(player_x, player_y));
