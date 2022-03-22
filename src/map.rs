@@ -3,6 +3,10 @@ use super::{Rect};
 use std::cmp::{max, min};
 use specs::prelude::*;
 
+const MAPWIDTH : usize = 80;
+const MAPHEIGHT : usize = 43;
+const MAPCOUNT : usize = MAPHEIGHT * MAPWIDTH;
+
 #[derive(PartialEq, Copy, Clone)]
 pub enum TileType {
     Wall, Floor
@@ -52,18 +56,36 @@ impl Map {
         }
     }
 
+    fn is_exit_valid(&self, x:i32, y:i32) -> bool {
+        if x < 1 || x > self.width-1 || y < 1 || y > self.height-1 { return false; }
+        let idx = self.xy_idx(x, y);
+        !self.blocked[idx]
+    }
+
+    pub fn populate_blocked(&mut self) {
+        for (i,tile) in self.tiles.iter_mut().enumerate() {
+            self.blocked[i] = *tile == TileType::Wall;
+        }
+    }
+
+    pub fn clear_content_index(&mut self) {
+        for content in self.tile_content.iter_mut() {
+            content.clear();
+        }
+    }
+
     /// Makes a new map using the algorithm from http://rogueliketutorials.com/tutorials/tcod/part-3/
     /// This gives a handful of random rooms and corridors joining them together.
     pub fn new_map_rooms_and_corridors() -> Map {
         let mut map = Map{
-            tiles : vec![TileType::Wall; 80*50],
+            tiles : vec![TileType::Wall; MAPCOUNT],
             rooms : Vec::new(),
-            width : 80,
-            height: 50,
-            revealed_tiles : vec![false; 80*50],
-            visible_tiles : vec![false; 80*50],
-            blocked : vec![false; 80*50],
-            tile_content : vec![Vec::new(); 80*50]
+            width : MAPWIDTH as i32,
+            height: MAPHEIGHT as i32,
+            revealed_tiles : vec![false; MAPCOUNT],
+            visible_tiles : vec![false; MAPCOUNT],
+            blocked : vec![false; MAPCOUNT],
+            tile_content : vec![Vec::new(); MAPCOUNT]
         };
 
         const MAX_ROOMS : i32 = 30;
@@ -103,24 +125,6 @@ impl Map {
 
         map
     }
-
-    fn is_exit_valid(&self, x:i32, y:i32) -> bool {
-        if x < 1 || x > self.width-1 || y < 1 || y > self.height-1 { return false; }
-        let idx = self.xy_idx(x, y);
-        !self.blocked[idx]
-    }
-
-    pub fn populate_blocked(&mut self) {
-        for (i, tile) in self.tiles.iter_mut().enumerate() {
-            self.blocked[i] = *tile == TileType::Wall;
-        }
-    }
-
-    pub fn clear_content_index(&mut self) {
-        for content in self.tile_content.iter_mut() {
-            content.clear();
-        }
-    }
 }
 
 impl BaseMap for Map {
@@ -141,13 +145,13 @@ impl BaseMap for Map {
         let y = idx as i32 / self.width;
         let w = self.width as usize;
 
-        // 縦横
+        // Cardinal directions
         if self.is_exit_valid(x-1, y) { exits.push((idx-1, 1.0)) };
         if self.is_exit_valid(x+1, y) { exits.push((idx+1, 1.0)) };
         if self.is_exit_valid(x, y-1) { exits.push((idx-w, 1.0)) };
         if self.is_exit_valid(x, y+1) { exits.push((idx+w, 1.0)) };
 
-        // 斜め
+        // Diagonals
         if self.is_exit_valid(x-1, y-1) { exits.push(((idx-w)-1, 1.45)); }
         if self.is_exit_valid(x+1, y-1) { exits.push(((idx-w)+1, 1.45)); }
         if self.is_exit_valid(x-1, y+1) { exits.push(((idx+w)-1, 1.45)); }
@@ -190,7 +194,7 @@ pub fn draw_map(ecs: &World, ctx : &mut Rltk) {
 
         // Move the coordinates
         x += 1;
-        if x > 79 {
+        if x > MAPWIDTH as i32-1 {
             x = 0;
             y += 1;
         }

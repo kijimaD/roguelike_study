@@ -17,13 +17,14 @@ impl<'a> System<'a> for MapIndexingSystem {
         for (entity, position) in (&entities, &position).join() {
             let idx = map.xy_idx(position.x, position.y);
 
-            // ブロックされてたら、更新する
+            // If they block, update the blocking list
             let _p : Option<&BlocksTile> = blockers.get(entity);
             if let Some(_p) = _p {
                 map.blocked[idx] = true;
             }
 
-            // entityを、対応したtile_contentに入れる
+            // Push the entity to the appropriate index slot. It's a Copy
+            // type, so we don't need to clone it (we want to avoid moving it out of the ECS!)
             map.tile_content[idx].push(entity);
         }
     }
