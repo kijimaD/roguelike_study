@@ -21,6 +21,7 @@ use damage_system::DamageSystem;
 mod gui;
 mod gamelog;
 use gamelog::GameLog;
+mod spawner;
 
 
 #[derive(PartialEq, Copy, Clone)]
@@ -117,19 +118,7 @@ fn main() -> rltk::BError {
     let map : Map = Map::new_map_rooms_and_corridors();
     let (player_x, player_y) = map.rooms[0].center();
 
-    let player_entity = gs.ecs
-        .create_entity()
-        .with(Position { x: player_x, y: player_y })
-        .with(Renderable {
-            glyph: rltk::to_cp437('@'),
-            fg: RGB::named(rltk::YELLOW),
-            bg: RGB::named(rltk::BLACK),
-        })
-        .with(Player{})
-        .with(Viewshed{ visible_tiles : Vec::new(), range: 8, dirty: true })
-        .with(Name{name: "Player".to_string() })
-        .with(CombatStats{ max_hp: 30, hp: 30, defense: 2, power: 5 })
-        .build();
+    let player_entity = spawner::player(&mut gs.ecs, player_x, player_y);
 
     let mut rng = rltk::RandomNumberGenerator::new();
     for (i,room) in map.rooms.iter().skip(1).enumerate() {
@@ -163,6 +152,7 @@ fn main() -> rltk::BError {
     gs.ecs.insert(player_entity);
     gs.ecs.insert(RunState::PreRun);
     gs.ecs.insert(gamelog::GameLog{ entries : vec!["Welcome to Rusty Roguelike".to_string()] });
+    gs.ecs.insert(rltk::RandomNumberGenerator::new());
 
     rltk::main_loop(context, gs)
 }
