@@ -22,6 +22,8 @@ mod gui;
 mod gamelog;
 use gamelog::GameLog;
 mod spawner;
+mod inventory_system;
+use inventory_system::ItemCollectionSystem;
 
 
 #[derive(PartialEq, Copy, Clone)]
@@ -44,6 +46,8 @@ impl State {
         let mut damage = DamageSystem{};
         damage.run_now(&self.ecs);
         self.ecs.maintain();
+        let mut pickup = ItemCollectionSystem{};
+        pickup.run_now(&self.ecs);
     }
 }
 
@@ -116,6 +120,8 @@ fn main() -> rltk::BError {
     gs.ecs.register::<SufferDamage>();
     gs.ecs.register::<Item>();
     gs.ecs.register::<Potion>();
+    gs.ecs.register::<InBackpack>();
+    gs.ecs.register::<WantsToPickupItem>();
 
     let map : Map = Map::new_map_rooms_and_corridors();
     let (player_x, player_y) = map.rooms[0].center();
