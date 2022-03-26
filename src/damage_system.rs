@@ -1,12 +1,11 @@
 use specs::prelude::*;
 use super::{CombatStats, SufferDamage, Player, Name, gamelog::GameLog};
-use rltk::console;
 
 pub struct DamageSystem {}
 
 impl<'a> System<'a> for DamageSystem {
     type SystemData = ( WriteStorage<'a, CombatStats>,
-                        WriteStorage<'a, SufferDamage>);
+                        WriteStorage<'a, SufferDamage> );
 
     fn run(&mut self, data : Self::SystemData) {
         let (mut stats, mut damage) = data;
@@ -35,11 +34,11 @@ pub fn delete_the_dead(ecs : &mut World) {
                     None => {
                         let victim_name = names.get(entity);
                         if let Some(victim_name) = victim_name {
-                            log.entries.push(format!("{} is dead", &victim_name.name))
+                            log.entries.push(format!("{} is dead", &victim_name.name));
                         }
                         dead.push(entity)
                     }
-                    Some(_) => console::log("Your are dead")
+                    Some(_) => rltk::console::log("You are dead")
                 }
             }
         }

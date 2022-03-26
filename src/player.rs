@@ -1,7 +1,8 @@
 use rltk::{VirtualKeyCode, Rltk, Point};
 use specs::prelude::*;
 use std::cmp::{max, min};
-use super::{Position, Player, Viewshed, State, Map, RunState, CombatStats, WantsToMelee, Item, GameLog, WantsToPickupItem};
+use super::{Position, Player, Viewshed, State, Map, RunState, CombatStats, WantsToMelee, Item,
+    gamelog::GameLog, WantsToPickupItem};
 
 pub fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
     let mut positions = ecs.write_storage::<Position>();
@@ -36,7 +37,7 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
     }
 }
 
-pub fn get_item(ecs: &mut World) {
+fn get_item(ecs: &mut World) {
     let player_pos = ecs.fetch::<Point>();
     let player_entity = ecs.fetch::<Entity>();
     let entities = ecs.entities();
@@ -85,7 +86,7 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
             VirtualKeyCode::S |
             VirtualKeyCode::J => try_move_player(0, 1, &mut gs.ecs),
 
-            // 斜め
+            // Diagonals
             VirtualKeyCode::Numpad9 |
             VirtualKeyCode::E |
             VirtualKeyCode::Y => try_move_player(1, -1, &mut gs.ecs),
@@ -102,8 +103,10 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
             VirtualKeyCode::Z |
             VirtualKeyCode::B => try_move_player(-1, 1, &mut gs.ecs),
 
+            // Picking up items
             VirtualKeyCode::G => get_item(&mut gs.ecs),
             VirtualKeyCode::I => return RunState::ShowInventory,
+            VirtualKeyCode::D => return RunState::ShowDropItem,
 
             _ => { return RunState::AwaitingInput }
         },
