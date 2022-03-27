@@ -27,6 +27,7 @@ mod spawner;
 mod inventory_system;
 use inventory_system::{ ItemCollectionSystem, ItemUseSystem, ItemDropSystem };
 pub mod saveload_system;
+pub mod random_table;
 
 
 
