@@ -1,11 +1,10 @@
-use std::collections::HashMap;
 use rltk::{ RGB, RandomNumberGenerator };
 use specs::prelude::*;
 use super::{CombatStats, Player, Renderable, Name, Position, Viewshed, Monster, BlocksTile, Rect, Item,
-            Consumable, Ranged, ProvidesHealing, map::MAPWIDTH, InflictsDamage, AreaOfEffect,
-            Confusion, SerializeMe, random_table::RandomTable, Equippable, EquipmentSlot, MeleePowerBonus,
-            DefenseBonus};
+    Consumable, Ranged, ProvidesHealing, map::MAPWIDTH, InflictsDamage, AreaOfEffect, Confusion, SerializeMe,
+    random_table::RandomTable, EquipmentSlot, Equippable, MeleePowerBonus, DefenseBonus };
 use specs::saveload::{MarkedBuilder, SimpleMarker};
+use std::collections::HashMap;
 
 /// Spawns the player and returns his/her entity object.
 pub fn player(ecs : &mut World, player_x : i32, player_y : i32) -> Entity {
@@ -42,11 +41,13 @@ fn room_table(map_depth: i32) -> RandomTable {
         .add("Tower Shield", map_depth - 1)
 }
 
+/// Fills a room with stuff!
 #[allow(clippy::map_entry)]
 pub fn spawn_room(ecs: &mut World, room : &Rect, map_depth: i32) {
     let spawn_table = room_table(map_depth);
     let mut spawn_points : HashMap<usize, String> = HashMap::new();
 
+    // Scope to keep the borrow checker happy
     {
         let mut rng = ecs.write_resource::<RandomNumberGenerator>();
         let num_spawns = rng.roll_dice(1, MAX_MONSTERS + 3) + (map_depth - 1) - 3;
@@ -67,6 +68,8 @@ pub fn spawn_room(ecs: &mut World, room : &Rect, map_depth: i32) {
             }
         }
     }
+
+    // Actually spawn the monsters
     for spawn in spawn_points.iter() {
         let x = (*spawn.0 % MAPWIDTH) as i32;
         let y = (*spawn.0 / MAPWIDTH) as i32;
@@ -183,7 +186,7 @@ fn confusion_scroll(ecs: &mut World, x: i32, y: i32) {
 fn dagger(ecs: &mut World, x: i32, y: i32) {
     ecs.create_entity()
         .with(Position{ x, y })
-        .with(Renderable {
+        .with(Renderable{
             glyph: rltk::to_cp437('/'),
             fg: RGB::named(rltk::CYAN),
             bg: RGB::named(rltk::BLACK),
@@ -197,29 +200,12 @@ fn dagger(ecs: &mut World, x: i32, y: i32) {
         .build();
 }
 
-fn longsword(ecs: &mut World, x: i32, y: i32) {
-    ecs.create_entity()
-        .with(Position{ x, y })
-        .with(Renderable {
-            glyph: rltk::to_cp437('/'),
-            fg: RGB::named(rltk::CYAN),
-            bg: RGB::named(rltk::BLACK),
-            render_order: 2
-        })
-        .with(Name{ name : "Longsword".to_string() })
-        .with(Item{})
-        .with(Equippable{ slot: EquipmentSlot::Melee })
-        .with(MeleePowerBonus{ power: 4 })
-        .marked::<SimpleMarker<SerializeMe>>()
-        .build();
-}
-
 fn shield(ecs: &mut World, x: i32, y: i32) {
     ecs.create_entity()
         .with(Position{ x, y })
-        .with(Renderable {
+        .with(Renderable{
             glyph: rltk::to_cp437('('),
-            fg: RGB::named(rltk::YELLOW),
+            fg: RGB::named(rltk::CYAN),
             bg: RGB::named(rltk::BLACK),
             render_order: 2
         })
@@ -231,10 +217,27 @@ fn shield(ecs: &mut World, x: i32, y: i32) {
         .build();
 }
 
+fn longsword(ecs: &mut World, x: i32, y: i32) {
+    ecs.create_entity()
+        .with(Position{ x, y })
+        .with(Renderable{
+            glyph: rltk::to_cp437('/'),
+            fg: RGB::named(rltk::YELLOW),
+            bg: RGB::named(rltk::BLACK),
+            render_order: 2
+        })
+        .with(Name{ name : "Longsword".to_string() })
+        .with(Item{})
+        .with(Equippable{ slot: EquipmentSlot::Melee })
+        .with(MeleePowerBonus{ power: 4 })
+        .marked::<SimpleMarker<SerializeMe>>()
+        .build();
+}
+
 fn tower_shield(ecs: &mut World, x: i32, y: i32) {
     ecs.create_entity()
         .with(Position{ x, y })
-        .with(Renderable {
+        .with(Renderable{
             glyph: rltk::to_cp437('('),
             fg: RGB::named(rltk::YELLOW),
             bg: RGB::named(rltk::BLACK),
